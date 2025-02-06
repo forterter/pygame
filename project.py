@@ -68,3 +68,31 @@ def check_collision(player_pos, bullet_list):
                 player_pos[1] - player_hitbox_height // 2 < bullet[1] + bullet_hitbox_size[1] < player_pos[1] + player_hitbox_height // 2):
                 return True
     return False
+
+# Функция для отображения главного меню
+def main_menu():
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if play_button.collidepoint(mouse_pos):
+                        show_difficulty_menu()
+
+        # Добавляем фон
+        screen.fill(black)
+        background = pygame.image.load('background.png')
+        background = pygame.transform.scale(background, (width, height))
+        screen.blit(background, (0, 0))
+
+        # Играть
+        play_button = pygame.Rect(width // 2 - 75, height // 2 - 25, 150, 50)
+        pygame.draw.rect(screen, white, play_button)
+        font = pygame.font.Font(None, 36)
+        text = font.render("Играть", True, black)
+        text_rect = text.get_rect(center=play_button.center)
+        screen.blit(text, text_rect)
