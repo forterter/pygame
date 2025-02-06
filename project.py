@@ -31,7 +31,7 @@ bullet_list = []
 bullet_image = pygame.image.load("meteorit.png")
 bullet_image = pygame.transform.scale(bullet_image, bullet_size)
 
-
+# Функция для создания новой пули
 def create_bullet(target_pos, difficulty):
     x_pos = random.randint(0, width - bullet_size[0])
     y_pos = 0  # Начинаем с верхней части экрана
@@ -44,7 +44,7 @@ def create_bullet(target_pos, difficulty):
         bullet_speed_mod = 7
     bullet_list.append([x_pos, y_pos, angle, bullet_speed_mod])
 
-
+# Функция для обновления позиций пуль
 def update_bullets():
     for bullet in bullet_list:
         dx, dy = bullet[2]
@@ -53,5 +53,18 @@ def update_bullets():
         dy = (dy / length) * bullet[3]
         bullet[0] += dx
         bullet[1] += dy
-        if bullet[0] > height or bullet[1] < 0 or bullet[0] > width:
+        if bullet[1] > height or bullet[0] < 0 or bullet[0] > width:
             bullet_list.remove(bullet)
+
+# Функция для проверки столкновений
+def check_collision(player_pos, bullet_list):
+    for bullet in bullet_list:
+        distance = ((player_pos[0] - bullet[0])**2 + (player_pos[1] - bullet[1])**2)**0.5
+        if distance <= 5:
+            # Проверяем, попадает ли пуля в хитбокс игрока
+            if (player_pos[0] - player_hitbox_width // 2 < bullet[0] < player_pos[0] + player_hitbox_width // 2 or
+                player_pos[0] - player_hitbox_width // 2 < bullet[0] + bullet_hitbox_size[0] < player_pos[0] + player_hitbox_width // 2) and \
+               (player_pos[1] - player_hitbox_height // 2 < bullet[1] < player_pos[1] + player_hitbox_height // 2 or
+                player_pos[1] - player_hitbox_height // 2 < bullet[1] + bullet_hitbox_size[1] < player_pos[1] + player_hitbox_height // 2):
+                return True
+    return False
