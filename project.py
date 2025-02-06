@@ -30,3 +30,28 @@ bullet_list = []
 
 bullet_image = pygame.image.load("meteorit.png")
 bullet_image = pygame.transform.scale(bullet_image, bullet_size)
+
+
+def create_bullet(target_pos, difficulty):
+    x_pos = random.randint(0, width - bullet_size[0])
+    y_pos = 0  # Начинаем с верхней части экрана
+    angle = (target_pos[0] - x_pos, target_pos[1] - y_pos)
+    if difficulty == 'easy':
+        bullet_speed_mod = 3
+    elif difficulty == 'medium':
+        bullet_speed_mod = 5
+    elif difficulty == 'hard':
+        bullet_speed_mod = 7
+    bullet_list.append([x_pos, y_pos, angle, bullet_speed_mod])
+
+
+def update_bullets():
+    for bullet in bullet_list:
+        dx, dy = bullet[2]
+        length = (dx**2 + dy**2) ** 0.5
+        dx = (dx / length) * bullet[3]
+        dy = (dy / length) * bullet[3]
+        bullet[0] += dx
+        bullet[1] += dy
+        if bullet[0] > height or bullet[1] < 0 or bullet[0] > width:
+            bullet_list.remove(bullet)
