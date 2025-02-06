@@ -96,3 +96,5 @@ def main_menu():
         text = font.render("Играть", True, black)
         text_rect = text.get_rect(center=play_button.center)
         screen.blit(text, text_rect)
+
+        pygame.display.flip()
