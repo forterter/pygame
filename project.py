@@ -98,3 +98,4 @@ def main_menu():
         screen.blit(text, text_rect)
 
         pygame.display.flip()
+
