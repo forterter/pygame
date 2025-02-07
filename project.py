@@ -99,3 +99,103 @@ def main_menu():
 
         pygame.display.flip()
 
+
+# Функция для отображения меню выбора уровня сложности
+def show_difficulty_menu():
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # ЛКМ
+                    mouse_pos = pygame.mouse.get_pos()
+                    if easy_button.collidepoint(mouse_pos):
+                        game_loop(difficulty='easy')
+                    elif medium_button.collidepoint(mouse_pos):
+                        game_loop(difficulty='medium')
+                    elif hard_button.collidepoint(mouse_pos):
+                        game_loop(difficulty='hard')
+
+        # Заливаем экран фоном
+        screen.fill(black)
+        background = pygame.image.load('background.png')
+        background = pygame.transform.scale(background, (width, height))
+        screen.blit(background, (0, 0))
+
+        # Кнопки для выбора уровня сложности
+        easy_button = pygame.Rect(width // 4 - 75, height // 2 - 25, 150, 50)
+        medium_button = pygame.Rect(width // 2 - 75, height // 2 - 25, 150, 50)
+        hard_button = pygame.Rect(width * 3 // 4 - 75, height // 2 - 25, 150, 50)
+        pygame.draw.rect(screen, white, easy_button)
+        pygame.draw.rect(screen, white, medium_button)
+        pygame.draw.rect(screen, white, hard_button)
+        font = pygame.font.Font(None, 36)
+        easy_text = font.render("Легкий", True, black)
+        medium_text = font.render("Средний", True, black)
+        hard_text = font.render("Сложный", True, black)
+        easy_rect = easy_text.get_rect(center=easy_button.center)
+        medium_rect = medium_text.get_rect(center=medium_button.center)
+        hard_rect = hard_text.get_rect(center=hard_button.center)
+        screen.blit(easy_text, easy_rect)
+        screen.blit(medium_text, medium_rect)
+        screen.blit(hard_text, hard_rect)
+
+        pygame.display.flip()
+
+
+# Основной игровой цикл
+def game_loop(difficulty='easy'):
+    global player_pos, bullet_list
+    player_pos = [width // 2, height // 2]
+    bullet_list = []
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        keys = pygame.key.get_pressed()
+
+        # Обновляем позицию игрока
+        if keys[pygame.K_LEFT]:
+            player_pos[0] -= player_speed
+        if keys[pygame.K_RIGHT]:
+            player_pos[0] += player_speed
+        if keys[pygame.K_UP]:
+            player_pos[1] -= player_speed
+        if keys[pygame.K_DOWN]:
+            player_pos[1] += player_speed
+
+        # Убедитесь, что игрок остается в пределах экрана
+        player_pos[0] = max(0, min(player_pos[0], width - player_size))
+        player_pos[1] = max(0, min(player_pos[1], height - player_size))
+
+        # Создаем пули
+        if random.randint(1, 20) == 1:
+            create_bullet(player_pos, difficulty)
+
+        # Обновляем позиции пуль
+        update_bullets()
+
+        # Проверяем на столкновения
+        if check_collision(player_pos, bullet_list):
+            game_over()
+
+        # Заливаем экран черным цветом
+        screen.fill(black)
+
+        # Рисуем игрока
+        screen.blit(player_image, (player_pos[0], player_pos[1]))
+
+        # Рисуем пули
+        for bullet in bullet_list:
+            screen.blit(bullet_image, (bullet[0], bullet[1]))
+
+        pygame.display.flip()
+
+        # Устанавливаем частоту кадров
+        pygame.time.Clock().tick(30)
+
