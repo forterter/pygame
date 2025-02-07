@@ -2,7 +2,6 @@ import pygame
 import sys
 import random
 
-
 pygame.init()
 
 width, height = 800, 600
@@ -13,9 +12,9 @@ black = (0, 0, 0)
 white = (255, 255, 255)
 
 # Игрок
-player_size = 50
-player_hitbox_width = 40  # Размер хитбокса игрока
-player_hitbox_height = 40
+player_size = 100
+player_hitbox_width = 55
+player_hitbox_height = 55
 player_pos = [width // 2, height // 2]
 player_speed = 5
 
@@ -23,9 +22,9 @@ player_image = pygame.image.load("i.png")
 player_image = pygame.transform.scale(player_image, (player_size, player_size))
 
 # Пули
-bullet_size = (20, 10)
-bullet_hitbox_size = (15, 10)  # Размер хитбокса пули
-bullet_speed = 5
+bullet_size = (40, 20)
+bullet_hitbox_size = (30, 20)
+bullet_speed = 10
 bullet_list = []
 
 bullet_image = pygame.image.load("meteorit.png")
@@ -37,11 +36,11 @@ def create_bullet(target_pos, difficulty):
     y_pos = 0  # Начинаем с верхней части экрана
     angle = (target_pos[0] - x_pos, target_pos[1] - y_pos)
     if difficulty == 'easy':
-        bullet_speed_mod = 3
-    elif difficulty == 'medium':
         bullet_speed_mod = 5
+    elif difficulty == 'medium':
+        bullet_speed_mod = 10
     elif difficulty == 'hard':
-        bullet_speed_mod = 7
+        bullet_speed_mod = 15
     bullet_list.append([x_pos, y_pos, angle, bullet_speed_mod])
 
 # Функция для обновления позиций пуль
@@ -59,14 +58,9 @@ def update_bullets():
 # Функция для проверки столкновений
 def check_collision(player_pos, bullet_list):
     for bullet in bullet_list:
-        distance = ((player_pos[0] - bullet[0])**2 + (player_pos[1] - bullet[1])**2)**0.5
-        if distance <= 5:
-            # Проверяем, попадает ли пуля в хитбокс игрока
-            if (player_pos[0] - player_hitbox_width // 2 < bullet[0] < player_pos[0] + player_hitbox_width // 2 or
-                player_pos[0] - player_hitbox_width // 2 < bullet[0] + bullet_hitbox_size[0] < player_pos[0] + player_hitbox_width // 2) and \
-               (player_pos[1] - player_hitbox_height // 2 < bullet[1] < player_pos[1] + player_hitbox_height // 2 or
-                player_pos[1] - player_hitbox_height // 2 < bullet[1] + bullet_hitbox_size[1] < player_pos[1] + player_hitbox_height // 2):
-                return True
+        if (player_pos[0] - player_hitbox_width // 2 <= bullet[0] <= player_pos[0] + player_hitbox_width // 2) and \
+           (player_pos[1] - player_hitbox_height // 2 <= bullet[1] <= player_pos[1] + player_hitbox_height // 2):
+            return True
     return False
 
 # Функция для отображения главного меню
@@ -144,7 +138,6 @@ def show_difficulty_menu():
 
         pygame.display.flip()
 
-
 # Основной игровой цикл
 def game_loop(difficulty='easy'):
     global player_pos, bullet_list
@@ -184,7 +177,7 @@ def game_loop(difficulty='easy'):
         if check_collision(player_pos, bullet_list):
             game_over()
 
-        # Заливаем экран черным цветом
+            # Заливаем экран черным цветом
         screen.fill(black)
 
         # Рисуем игрока
