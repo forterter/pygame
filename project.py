@@ -14,8 +14,8 @@ white = (255, 255, 255)
 
 # Игрок
 player_size = 50
-player_hitbox_width = 30  # Размер хитбокса игрока
-player_hitbox_height = 30
+player_hitbox_width = 40  # Размер хитбокса игрока
+player_hitbox_height = 40
 player_pos = [width // 2, height // 2]
 player_speed = 5
 
@@ -24,7 +24,7 @@ player_image = pygame.transform.scale(player_image, (player_size, player_size))
 
 # Пули
 bullet_size = (20, 10)
-bullet_hitbox_size = (15, 5)  # Размер хитбокса пули
+bullet_hitbox_size = (15, 10)  # Размер хитбокса пули
 bullet_speed = 5
 bullet_list = []
 
@@ -199,3 +199,42 @@ def game_loop(difficulty='easy'):
         # Устанавливаем частоту кадров
         pygame.time.Clock().tick(30)
 
+def game_over():
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if play_button.collidepoint(mouse_pos):
+                        show_difficulty_menu()
+
+        # Заливаем экран фоном
+        screen.fill(black)
+        background = pygame.image.load('background.png')
+        background = pygame.transform.scale(background, (width, height))
+        screen.blit(background, (0, 0))
+
+        # Игра окончена
+        font = pygame.font.Font(None, 72)
+        text = font.render("Игра окончена", True, white)
+        text_rect = text.get_rect(center=(width // 2, height // 2 - 50))
+        screen.blit(text, text_rect)
+
+        # Играть
+        play_button = pygame.Rect(width // 2 - 75, height // 2 + 25, 150, 50)
+        pygame.draw.rect(screen, white, play_button)
+        font = pygame.font.Font(None, 36)
+        text = font.render("Играть", True, black)
+        text_rect = text.get_rect(center=play_button.center)
+        screen.blit(text, text_rect)
+
+        pygame.display.flip()
+
+
+main_menu()
+
+pygame.quit()
