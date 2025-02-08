@@ -6,60 +6,67 @@ pygame.init()
 
 width, height = 800, 600
 screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Dodge the targeted bullets")
+pygame.display.set_caption("Dodge bullets")
 
 black = (0, 0, 0)
 white = (255, 255, 255)
 
+# Загрузка изображений
+player_image = pygame.image.load('../pythonProject4/img_3.png')
+bullet_image = pygame.image.load('img_2.png')
+
 # Игрок
-player_size = 100
-player_hitbox_width = 55
-player_hitbox_height = 55
+player_hitbox_width = 40
+player_hitbox_height = 40
 player_pos = [width // 2, height // 2]
 player_speed = 5
 
-player_image = pygame.image.load("i.png")
-player_image = pygame.transform.scale(player_image, (player_size, player_size))
+# Загрузка изображений
+
 
 # Пули
-bullet_size = (40, 20)
-bullet_hitbox_size = (30, 20)
-bullet_speed = 10
+bullet_hitbox_size = (20, 20)
+bullet_speed = 5
 bullet_list = []
 
-bullet_image = pygame.image.load("meteorit.png")
-bullet_image = pygame.transform.scale(bullet_image, bullet_size)
+player_image = pygame.transform.scale(player_image, (player_hitbox_width, player_hitbox_height))  # Масштабируем изображение игрока
+
+bullet_image = pygame.transform.scale(bullet_image, bullet_hitbox_size)  # Масштабируем изображение пули
 
 # Функция для создания новой пули
 def create_bullet(target_pos, difficulty):
-    x_pos = random.randint(0, width - bullet_size[0])
+    x_pos = random.randint(0, width - bullet_hitbox_size[0])
     y_pos = 0  # Начинаем с верхней части экрана
     angle = (target_pos[0] - x_pos, target_pos[1] - y_pos)
     if difficulty == 'easy':
-        bullet_speed_mod = 5
+        bullet_speed_mod = bullet_speed * 1  # Легкий уровень
     elif difficulty == 'medium':
-        bullet_speed_mod = 10
+        bullet_speed_mod = bullet_speed * 1.5  # Средний уровень
     elif difficulty == 'hard':
-        bullet_speed_mod = 15
+        bullet_speed_mod = bullet_speed * 2  # Сложный уровень
     bullet_list.append([x_pos, y_pos, angle, bullet_speed_mod])
 
 # Функция для обновления позиций пуль
 def update_bullets():
+    new_bullet_list = []
     for bullet in bullet_list:
         dx, dy = bullet[2]
         length = (dx**2 + dy**2) ** 0.5
-        dx = (dx / length) * bullet[3]
-        dy = (dy / length) * bullet[3]
-        bullet[0] += dx
-        bullet[1] += dy
-        if bullet[1] > height or bullet[0] < 0 or bullet[0] > width:
-            bullet_list.remove(bullet)
+        if length > 0:  # Избегаем деления на ноль
+            dx = (dx / length) * bullet[3]
+            dy = (dy / length) * bullet[3]
+            bullet[0] += dx
+            bullet[1] += dy
+            if bullet[1] <= height and 0 <= bullet[0] <= width:
+                new_bullet_list.append(bullet)
+    return new_bullet_list
 
 # Функция для проверки столкновений
 def check_collision(player_pos, bullet_list):
+    player_rect = pygame.Rect(player_pos[0], player_pos[1], player_hitbox_width, player_hitbox_height)
     for bullet in bullet_list:
-        if (player_pos[0] - player_hitbox_width // 2 <= bullet[0] <= player_pos[0] + player_hitbox_width // 2) and \
-           (player_pos[1] - player_hitbox_height // 2 <= bullet[1] <= player_pos[1] + player_hitbox_height // 2):
+        bullet_rect = pygame.Rect(bullet[0], bullet[1], bullet_hitbox_size[0], bullet_hitbox_size[1])
+        if player_rect.colliderect(bullet_rect):
             return True
     return False
 
@@ -93,8 +100,6 @@ def main_menu():
 
         pygame.display.flip()
 
-
-# Функция для отображения меню выбора уровня сложности
 def show_difficulty_menu():
     while True:
         for event in pygame.event.get():
@@ -150,9 +155,14 @@ def game_loop(difficulty='easy'):
                 pygame.quit()
                 sys.exit()
 
-        keys = pygame.key.get_pressed()
+        # Заливаем экран фоном
+        screen.fill(black)
+        background = pygame.image.load('background2.jpg')
+        background = pygame.transform.scale(background, (width, height))
+        screen.blit(background, (0, 0))
 
         # Обновляем позицию игрока
+        keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             player_pos[0] -= player_speed
         if keys[pygame.K_RIGHT]:
@@ -163,36 +173,37 @@ def game_loop(difficulty='easy'):
             player_pos[1] += player_speed
 
         # Убедитесь, что игрок остается в пределах экрана
-        player_pos[0] = max(0, min(player_pos[0], width - player_size))
-        player_pos[1] = max(0, min(player_pos[1], height - player_size))
+        player_pos[0] = max(0, min(player_pos[0], width - player_hitbox_width))
+        player_pos[1] = max(0, min(player_pos[1], height - player_hitbox_height))
 
         # Создаем пули
         if random.randint(1, 20) == 1:
             create_bullet(player_pos, difficulty)
 
         # Обновляем позиции пуль
-        update_bullets()
+        bullet_list[:] = update_bullets()  # Обновляем список пуль
 
         # Проверяем на столкновения
         if check_collision(player_pos, bullet_list):
             game_over()
 
-            # Заливаем экран черным цветом
-        screen.fill(black)
+        # Рисуем игрока (изображение)
+        player_rect = player_image.get_rect(center=(player_pos[0] + player_hitbox_width // 2, player_pos[1] + player_hitbox_height // 2))
+        screen.blit(player_image, player_rect)
 
-        # Рисуем игрока
-        screen.blit(player_image, (player_pos[0], player_pos[1]))
-
-        # Рисуем пули
+        # Рисуем пули (изображения)
         for bullet in bullet_list:
-            screen.blit(bullet_image, (bullet[0], bullet[1]))
+            bullet_rect = bullet_image.get_rect(center=(bullet[0] + bullet_hitbox_size[0] // 2, bullet[1] + bullet_hitbox_size[1] // 2))
+            screen.blit(bullet_image, bullet_rect)
 
         pygame.display.flip()
 
         # Устанавливаем частоту кадров
-        pygame.time.Clock().tick(30)
+        pygame.time.Clock().tick(60)
 
 def game_over():
+    global play_button  # Объявляем переменную как глобальную
+    play_button = pygame.Rect(width // 2 - 75, height // 2 - 25, 150, 50)  # Определяем play_button
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -217,17 +228,16 @@ def game_over():
         text_rect = text.get_rect(center=(width // 2, height // 2 - 50))
         screen.blit(text, text_rect)
 
-        # Играть
-        play_button = pygame.Rect(width // 2 - 75, height // 2 + 25, 150, 50)
+        # Кнопка для возврата в главное меню
         pygame.draw.rect(screen, white, play_button)
         font = pygame.font.Font(None, 36)
-        text = font.render("Играть", True, black)
-        text_rect = text.get_rect(center=play_button.center)
-        screen.blit(text, text_rect)
+        play_text = font.render("Играть", True, black)
+        play_text_rect = play_text.get_rect(center=play_button.center)
+        screen.blit(play_text, play_text_rect)
 
         pygame.display.flip()
 
-
+# Запуск главного меню
 main_menu()
 
 pygame.quit()
