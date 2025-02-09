@@ -24,7 +24,7 @@ if cursor.fetchone() is None:
 
 width, height = 800, 600
 screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Dodge bullets")
+pygame.display.set_caption("Уклоняйся от пуль")
 
 black = (0, 0, 0)
 white = (255, 255, 255)
